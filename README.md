@@ -1,94 +1,95 @@
-# 🖊️ DIY Arduino CNC Plotter (28BYJ-48 + Servo)
 
-A low-cost, open-source desktop CNC plotter (drawing robot) powered by an Arduino Uno. This project is designed to create precise drawings using affordable 28BYJ-48 stepper motors and a servo motor for the Z-axis (pen lift mechanism).
+#  Low-Cost DIY CNC Pen Plotter 
 
-![Project Status](https://img.shields.io/badge/Status-Completed-success)
-![Hardware](https://img.shields.io/badge/Hardware-Arduino_Uno-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+A budget-friendly 2-axis CNC drawing machine based on **Arduino Uno** and **GRBL**. Designed to create precise vector drawings using affordable 28BYJ-48 stepper motors and a servo motor for the pen lift mechanism.
 
-## 📋 Features
-* **Budget-Friendly:** Built using inexpensive components available worldwide.
-* **Servo Z-Axis:** Utilizes a standard SG90 servo for lifting and lowering the pen, replacing heavy Z-axis mechanisms.
-* **Custom Firmware:** Runs on a modified version of GRBL specifically tuned for 28BYJ-48 steppers and servo control.
-* **3D Printable:** All mechanical parts are designed for 3D printing (STL files included).
+> **Key Feature:** This repository contains a **custom-patched version of the GRBL library** inside the `Firmware/` folder, specifically adapted to run on **Windows 11**, fixing compatibility issues with modern Arduino IDEs.
+
 
 ---
 
-## 🛠️ Hardware Requirements (BOM)
+##  Features
+* **Budget-Friendly:** Built using inexpensive components (28BYJ-48 steppers).
+* **Servo Z-Axis:** Uses a standard SG90 servo for lifting the pen (commands M3/M5).
+* **Windows 11 Ready:** Includes a patched `print.c` configuration for modern OS support.
+* **Vibration Dampening:** Custom engineering solution to reduce pen wobble.
+
+---
+
+##  Hardware Requirements (BOM)
 
 ### Electronics:
 * [1x] **Arduino Uno** (with USB cable)
-* [2x] **28BYJ-48 Stepper Motors** (5V)
-* [2x] **ULN2003 Stepper Drivers**
-* [1x] **Micro Servo** (SG90 or equivalent)
-* [1x] **Micro USB Breakout Board** (Female) - for external power (optional but recommended)
+* [2x] **28BYJ-48 Stepper Motors** (5V) + **ULN2003 Drivers**
+* [1x] **Micro Servo** (SG90) for Z-axis
+* [1x] **External 5V / 2A Power Supply** (Crucial for stability)
 * Jumper wires (Male-to-Female, Male-to-Male)
 
 ### Mechanics:
 * [6x] 5mm Smooth Rods (Steel shafts)
 * [4x] GT2 Timing Pulleys (20 Teeth)
 * [2x] GT2 Timing Belt (~1 meter each)
-* [1x] Pen, marker, or pencil
-* M3 Screws and nuts for assembly
+* Custom 3D-printed chassis parts (PLA)
 
 ---
 
-## 📂 Repository Structure
+##  Wiring & Pinout
 
-* `/Firmware` — Modified GRBL source code supporting the servo Z-axis.
-* `/3D_Models` — Contains `CNC Plotter 3D Models.stl` with all printable parts.
-* `/Schematics` — Wiring diagrams:
-    * `CNC Plotter.fzz` (Fritzing source file)
-    * `Circuit Diagram.png` (Visual reference)
-* `/Software` — Links to necessary PC software (Inkscape, extensions, etc.).
+Connect the motors to the Arduino as follows. **Do not power motors directly from Arduino 5V!** Use an external power supply.
 
----
+| Component | Arduino Pin | Driver Pin |
+| :--- | :--- | :--- |
+| **X-Axis Motor** | Digital **2, 3, 4, 5** | ULN2003 IN1, IN2, IN3, IN4 |
+| **Y-Axis Motor** | Digital **6, 7, 8, 9** | ULN2003 IN1, IN2, IN3, IN4 |
+| **Z-Axis (Servo)** | Digital **11** | Signal (Orange/Yellow wire) |
+| **Power** | GND | Connect Power Supply GND to Arduino GND |
 
-## 🔌 Wiring & Connection
-
-Please refer to `Circuit Diagram.png` in the `/Schematics` folder for the visual guide.
-
-**Pinout Summary:**
-* **X-Axis (Stepper 1):** Arduino Pins `2, 3, 4, 5` → ULN2003 Driver IN1, IN2, IN3, IN4
-* **Y-Axis (Stepper 2):** Arduino Pins `6, 7, 8, 9` → ULN2003 Driver IN1, IN2, IN3, IN4
-* **Z-Axis (Servo):** Arduino Pin `11` (Signal), `5V`, `GND`
-* **Power:** Do not power both motors directly from the Arduino 5V pin. Use an external 5V power supply connected to the drivers.
+Please refer to the diagrams in the `Schematics/` folder for visual guides.
 
 ---
 
-## 💻 Software Prerequisites
+##  Software & Installation
 
-To use this plotter, you will need the following tools:
+### 1. Arduino Firmware (The Windows 11 Fix)
+Standard GRBL libraries often fail on Windows 11. Use our patched version found in this repo:
 
-1.  **Firmware:**
-    * Upload the code found in the `/Firmware` folder to your Arduino Uno using the Arduino IDE.
-    * *Note:* Standard GRBL **will not work** as it does not support servo motors for the Z-axis.
+1.  **Clone this repo:**
+    ```bash
+    git clone [https://github.com/0mnitrix/Tam-KOLLEGI-Final-project.git](https://github.com/0mnitrix/Tam-KOLLEGI-Final-project.git)
+    ```
+2.  **Install Library:**
+    * Go to the `Firmware/` folder.
+    * Copy the GRBL library folder to your local Arduino libraries path (usually `Documents/Arduino/libraries`).
+    * *Warning:* Delete any existing "GRBL" libraries to avoid conflicts.
+3.  **Flash:**
+    * Open the sketch inside `Firmware/` using Arduino IDE.
+    * Upload to your board.
 
-2.  **G-Code Generation (Inkscape):**
-    * **Inkscape:** Vector graphics editor.
-    * **MI Inkscape Extension:** A plugin to generate G-Code that uses `M3` and `M5` commands for the servo pen lift.
+### 2. G-Code Generation
+* **Inkscape:** Use for creating vector graphics.
+* **Extension:** Check the `Software/` folder for the **MI Inkscape Extension** or links to download it. This plugin correctly handles `M3` (Pen Down) and `M5` (Pen Up) commands.
 
-3.  **G-Code Sender:**
-    * **Universal G-Code Sender (UGS):** Platform to send the G-Code file to the Arduino.
+### 3. Sending Code
+* **Universal G-Code Sender (UGS):** Recommended platform.
+    * Baud Rate: `115200`
 
 ---
 
-## 🚀 How to Run
-
-1.  **Print:** 3D print all components found in `/3D_Models`.
-2.  **Assemble:** Construct the frame using the rods and screws. Mount the motors.
-3.  **Wire:** Connect the electronics according to the scheme in `/Schematics`.
-4.  **Flash:** Open the project in the `/Firmware` folder and upload it to your Arduino Uno.
-5.  **Connect:** Open **Universal G-Code Sender**, select the correct COM port and set the baud rate (usually `115200`).
-6.  **Plot:** Load your G-Code file and click "Send".
-
----
-
-## ⚙️ GRBL Configuration Tips
-
-After flashing, you may need to calibrate the steps per mm in the GRBL console (via UGS) to ensure accurate sizing.
-Typical settings for 28BYJ-48 motors:
+##  Repository Structure
 
 ```text
-$100=... (X-axis steps/mm)
-$101=... (Y-axis steps/mm)
+├── 3D_Models/       # STL files for 3D printing the chassis
+├── Firmware/        # Patched GRBL Library & Upload Sketch
+├── Photos/          # Project gallery and assembly photos
+├── Schematics/      # Wiring diagrams and Fritzing files
+├── Software/        # Tools and extensions (Inkscape plugins)
+└── README.md        # This file
+````
+
+-----
+
+##  Future Improvements
+
+  - [ ] **Expanded Area:** Scale the frame to support **A4 size** (21x29.7cm).
+  - [ ] **NEMA 17 Upgrade:** Replace 28BYJ-48s with NEMA 17 motors for 500% faster plotting speed.
+  - [ ] **Custom PCB:** Replace jumper wires with a soldered shield for reliability.
